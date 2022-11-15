@@ -13,6 +13,11 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
 
+/**
+ * \brief Function for identifying OpenCV matrix (cv::Mat) at runtime.
+ * \param type value returned from read image type() method.
+ * \return std::string that contains information about cv::Mat type
+ */
 std::string type2str(int type)
 {
 	std::string r;
@@ -32,6 +37,7 @@ std::string type2str(int type)
 	default:     r = "User"; break;
 	}
 
+	// Add number of channels
 	r += "C";
 	r += (channels + '0');
 
