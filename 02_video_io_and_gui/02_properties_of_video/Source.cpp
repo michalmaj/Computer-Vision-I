@@ -68,5 +68,7 @@ int main()
 	cv::waitKey(0);
 	cv::destroyWindow("Frame at 2.5s");
 
+	cap.release();
+
 	return 0;
 }
