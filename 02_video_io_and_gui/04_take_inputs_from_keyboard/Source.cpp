@@ -2,7 +2,7 @@
  * Graphical User Interface in OpenCV
  * OpenCV contains Highgui module for handle GUI.
  *
- * Highgui module provides an interfaqce to:
+ * Highgui module provides an interface to:
  *  - create and manipulate windows that can display images and "remember" their content;
  *	- add track-bars to the window, handle simple mouse events as well as keyboard commands;
  *	- read and write images to/from disk or memory;
