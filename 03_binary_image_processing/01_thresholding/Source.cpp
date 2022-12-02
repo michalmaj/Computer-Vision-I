@@ -5,7 +5,7 @@
  * It is easier to come up with algorithms which work on binary images.
  *
  * Threshold function in OpenCV:
- *	cv::threshold()
+ *	cv::threshold();
  * Syntax:
  *	double cv::threshold(InputArray src, OutputArray dst, double thresh, double maxval, int type)
  *
