@@ -1,7 +1,7 @@
 /*
  * Desaturation Filter:
  * Photo editing applications like photoshop or instagram use many different kinds of image enhancement techniques to make the
- * images look special. One such imahge enhancement technique is desaturation. We desaturate the image be decreasing the
+ * images look special. One such image enhancement technique is desaturation. We desaturate the image be decreasing the
  * values in the Saturation channel in HSV color space. This result in an image which looks faded or washed out, with no colors.
  */
 
