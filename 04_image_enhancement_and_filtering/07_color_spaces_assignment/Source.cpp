@@ -64,8 +64,7 @@ void convertBGRtoHSV(const cv::Mat& img, cv::Mat& output)
 
 	// Create temporary cv::Mat to perform conversion to HSV color space
 	cv::Mat hsv{ height, width, CV_32FC3, 0.0 };
-	//hsv.at < cv::Vec3f>(0, 0)[0] = 0.1;
-	//std::cout << hsv.at < cv::Vec3f>(0, 0)[0] << std::endl;
+
 	// Perform algorithm to change BGR color space to HSV color space
 	for(int h{0}; h < height; ++h)
 	{
