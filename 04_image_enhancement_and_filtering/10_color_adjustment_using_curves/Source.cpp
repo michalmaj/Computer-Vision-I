@@ -77,6 +77,7 @@ int main()
 	cv::min(bLUT, 255, bLUT);
 	cv::max(bLUT, 0, bLUT);
 
+
 	// Apply interpolation and create look up table
  	interp(fullRange, rCurve, originalValue, lut);
 
@@ -136,7 +137,7 @@ int main()
 
 	cv::imshow("Cool filter output", combined);
 	cv::waitKey(0);
-	cv::destroyWindow("Warm filter output");
+	cv::destroyWindow("Cool filter output");
 
 	return 0;
 }
