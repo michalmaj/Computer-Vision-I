@@ -24,7 +24,8 @@
 #include <matplot/matplot.h>
 
 
-void show(const std::vector<cv::Mat>& mat)
+
+void showPlot(const std::vector<cv::Mat>& mat)
 {
 	std::vector<std::vector<double>> vec{mat.begin(), mat.end()};
 
@@ -39,6 +40,15 @@ void show(const std::vector<cv::Mat>& mat)
 	matplot::xlabel("Measured Intensity");
 	matplot::ylabel("Calibrated Intensity");
 	matplot::show();
+}
+
+void show(const std::string& name, const cv::Mat& mat, int width=800, int height=600)
+{
+	cv::namedWindow(name, cv::WINDOW_NORMAL);
+	cv::resizeWindow(name, width, height);
+	cv::imshow(name, mat);
+	cv::waitKey(0);
+	cv::destroyWindow(name);
 }
 
 // How to create HDR images?
@@ -137,7 +147,84 @@ int main()
 	cv::split(responseDebevec, responseChannels);
 
 	// Show figure to presents the CRF recovered using the images for red, green and blue channels. 
-	show(responseChannels);
+	showPlot(responseChannels);
+
+	/*
+	 * Step 4: Merge Images
+	 * Once the CRF has been estimated, we can merge the exposure images into one HDR image using MergeDebevec
+	 */
+
+	cv::Mat hdrDebevec;
+	cv::Ptr<cv::MergeDebevec> mergeDebevec = cv::createMergeDebevec();
+	mergeDebevec->process(images, hdrDebevec, times, responseDebevec);
+
+	/*
+	 * Step 5: Tone mapping
+	 * The process of converting a High Dynamic Range (HDR) image to an 8-bit channel image while preserving asa much detail as possible is called Tone mapping.
+	 * The minimum value is 0 for a pitch black condition, the maximum value is theoretical infinite.
+	 * Even though we have recovered the relative brightness information using multiple images, we now have the challenge of saving this information as a 24-bit
+	 * image for display purposes.
+	 * There are several tone mapping algorithm. OpenCV implements few of them. The thing to keep in mind is that there is no right way to do tone mapping.
+	 * Usually, we want to see more detail in the tonemapped image than in any one of the exposure images. Sometimes the goal of tone mapping is to produce
+	 * realistic images and often times the goal is to produce surreal images.
+	 * We have some options:
+	 *  - gamma - this parameter compress the dynamic range by applying a gamma correction. When gamma is equal to 1, bo correction applied. A gamma less than
+	 *			  1 darkness the image, while gamma greater than 1 brightness the image.
+	 *	- saturation - this parameter is used to increase or decrease the amount of saturation. When saturation is high, the colors are richer and more intense
+	 *				   Saturation value closer to zero, makes colors fade away to gray-scale.
+	 *	- contrast - controls the contrast (i.e. log(maxPixelValue/minPixelValue)) of the output image
+	 */
+
+	/*
+	 * Step 5a: Drago Tonemap:
+	 * Ptr<TonemapDrago> cv::createTonemapDrago(float gamma = 1.0f, float saturation = 1.0f, float bias = 0.85f)
+	 * Bias is the value for bias function in [0, 1] range. Values from 0.7 to 0.9 usually give the best results. The default value is 0.85.
+	 */
+	cv::Mat ldrDrago;
+	cv::Ptr<cv::TonemapDrago> tonemapDrogo = cv::createTonemapDrago(1.0, 0.7);
+	tonemapDrogo->process(hdrDebevec, ldrDrago);
+	ldrDrago *= 3;
+
+	show("HDR using Drago Tone Mapping", ldrDrago);
+
+
+	/*
+	 * Step 5b: Reinhard Tonemap:
+	 * Ptr<TonemapReinhard> cv::createTonemapReinhard(float gamma = 1.0f, float intensity = 0.0f, float light_adapt = 1.0f, float color_adapt = 0.0f)
+	 * Parameters:
+	 *	- intensity - should be in the [-8, 8] range. Greater intensity value produces brighter results.
+	 *	- light_adapt - controls the light adaptation and is in the [0, 1] range. A value 1 indicates adaptation based only on pixel value and a value of 0
+	 *					indicates global adaptation. An in-between value can be used for a weighted combination of the two.
+	 *	- color_adapt - control chromatic adaptation and is in the [0, 1] range. the channels are treated independently if the value is set to 1 and the
+	 *					adaptation level is the same for every channel if the value set to 0. An in-between value can be used for weighted combination of the two.
+	 */
+
+	cv::Mat ldrReinhard;
+	cv::Ptr<cv::TonemapReinhard> tonemapReinhard = cv::createTonemapReinhard(1.5, 0, 0, 0);
+	tonemapReinhard->process(hdrDebevec, ldrReinhard);
+
+	show("HDR using Reinhard Tone Mapping", ldrReinhard);
+
+
+	/*
+	 * Step 5c: Mantiuk Tonemap:
+	 * Ptr<TonemapMantiuk> cv::createTonemapMantiuk(float gamma = 1.0f, float scale = 0.7f, float saturation = 1.0f)
+	 * The parameters scale is the contrast scale factor. Values from 0.6 to 0.9 produce best results.
+	 */
+	cv::Mat ldrMantiuk;
+	cv::Ptr<cv::TonemapMantiuk> tonemapMantiuk = cv::createTonemapMantiuk(2.2, 0.85, 1.2);
+	tonemapMantiuk->process(hdrDebevec, ldrMantiuk);
+	ldrMantiuk *= 3;
+
+	show("HDR using Mantiuk Tone Mapping", ldrMantiuk);
+
+	// Show all
+	std::vector<cv::Mat> ldrImages{ ldrDrago, ldrReinhard, ldrMantiuk };
+	cv::Mat ldr;
+	cv::hconcat(ldrImages, ldr);
+
+	show("All ldr images", ldr, 3 * 800);
+
 
 	return 0;
 }
