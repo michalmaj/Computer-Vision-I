@@ -35,6 +35,35 @@ cv::Mat pencilSketch(const cv::Mat& image, int arguments = 0) {
     return pencilSketchImage;
 }
 
+cv::Mat cartoonify(const cv::Mat& image, int arguments = 0) {
+
+    cv::Mat cartoonImage;
+
+    /// YOUR CODE HERE
+
+    // Convert to gray-scale
+    cv::Mat gray;
+    cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+
+    // Apply median
+    cv::Mat blurred;
+    //cv::medianBlur(gray, blurred, 3);
+    cv::GaussianBlur(gray, blurred, cv::Size(1, 1), 0, 0); // Gaussian blur giving better results
+
+    // Get the edges from blurred image
+    cv::Mat edges;
+    cv::adaptiveThreshold(blurred, edges, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 7);
+
+    // Apply bilateral filter
+    cv::Mat bilateral;
+    cv::bilateralFilter(image, bilateral, 7, 300, 300);
+
+    // Add a cartooning effect
+    cv::bitwise_and(bilateral, bilateral, cartoonImage, edges);
+
+    return cartoonImage;
+}
+
 int main()
 {
     // Read an image
@@ -48,9 +77,11 @@ int main()
     }
 
     cv::Mat pencilSketchImage{ pencilSketch(image) };
+    cv::Mat cartoonImage{ cartoonify(image) };
 
     // Show images
     cv::imshow("Pencil Sketch", pencilSketchImage);
+    cv::imshow("Cartoon Filter", cartoonImage);
     cv::waitKey(0);
     cv::destroyAllWindows();
 
