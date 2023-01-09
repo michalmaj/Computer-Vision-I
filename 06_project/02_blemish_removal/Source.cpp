@@ -28,6 +28,13 @@ struct BlemishRemovalParameters
 	};
 };
 
+cv::Mat getPatch(cv::Point center, void* userdata)
+{
+	auto brp{ static_cast<BlemishRemovalParameters*>(userdata) };
+	cv::Rect roi;
+	roi.x = center.x - brp->RADIUS - brp->RADIUS / 2;
+}
+
 cv::Point getBestPatch(int x, int y, void* userdata)
 {
 	auto brp{ static_cast<BlemishRemovalParameters*>(userdata) };
