@@ -5,7 +5,6 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/photo.hpp>
-//#include <memory> // auto brp = *reinterpret_cast<std::shared_ptr<BlemishRemovalParameters>*>(&userdata);
 
 
 struct BlemishRemovalParameters
